@@ -1,5 +1,6 @@
 using DemoWebApi.Data;
 using DemoWebApi.DTOS;
+using DemoWebApi.Helpers;
 using DemoWebApi.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,34 +20,36 @@ public class TripsService : ITripsService
 
     public async Task<TripResponse> CreateTripRequestAsync(TripRequest request)
     {
-        var selectedDriverId = Guid.CreateVersion7();
+        var drivers = _context.Users.
+            Where(d => (d.Role == AppRole.Driver || d.Role == AppRole.Rider));
+        var selectedDriver = drivers.PickRandom();
         var userId = Guid.CreateVersion7();
         var trip = new Trip
         {
             RiderId = userId,
-            DriverId = selectedDriverId,
+            DriverId = selectedDriver.Id,
             PickupLocation = request.PickupLocation,
             DropoffLocation = request.DropoffLocation,
             RequestTime = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
             Status = RideStatus.InProgress,
-            Fare = 5000
+            Fare = ApiConstants.Fares.PickRandom()
         };
 
         _context.Trips.Add(trip);
         await _context.SaveChangesAsync();
 
-        // Prepare response
         return new TripResponse
         {
             TripId = trip.Id,
             Driver = new DriverInfo
             {
-                DriverId = selectedDriverId,
+                DriverId = selectedDriver.Id,
                 FullName = string.Empty, 
-                Rating = 5
+                Rating = selectedDriver.Rating ?? 0,
             },
             EstimatedFare = trip.Fare,
-            EstimatedTimeInMinutes = 2
+            EstimatedTimeInMinutes = ApiConstants.TimeInMinutes.PickRandom()
         };
     }
 
@@ -80,10 +83,12 @@ public class TripsService : ITripsService
             case RideStatus.Requested:
             case RideStatus.Accepted:
                 trip.RequestTime = DateTime.UtcNow;
+                trip.UpdatedAt = DateTime.UtcNow;
                 break;
             case RideStatus.Completed:
             case RideStatus.Cancelled:
                 trip.EndTime = DateTime.UtcNow;
+                trip.UpdatedAt = DateTime.UtcNow;
                 break;
             case RideStatus.InProgress:
             default:
