@@ -64,7 +64,9 @@ try
     builder.Services.AddOpenApi(options =>
     {
     });
+    
     builder.Services.AddScoped<ITripsService, TripsService>();
+    builder.Services.AddScoped<IDriverService, DriverService>();
 
     var app = builder.Build();
     
