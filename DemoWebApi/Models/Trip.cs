@@ -1,4 +1,4 @@
-using DemoWebApi.Models;
+namespace DemoWebApi.Models;
 
 public class Trip : BaseModel
 {
