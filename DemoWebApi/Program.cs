@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using DemoWebApi.Data;
+using DemoWebApi.Helpers;
 using DemoWebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -63,6 +64,7 @@ try
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi(options =>
     {
+        options.AddDocumentTransformer<AuthSecuritySchemeTransformer>();
     });
     
     builder.Services.AddScoped<ITripsService, TripsService>();
@@ -76,9 +78,8 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
-        app.MapScalarApiReference(options =>
+        app.MapScalarApiReference("apidocs", options =>
         {
-            // Object initializer
             options.Title = "Demo API";
             options.ShowSidebar = true;
             options.AddPreferredSecuritySchemes("Bearer");
@@ -93,7 +94,7 @@ try
     
     Seeder.Initialize(app);
 
-    app.UseAuthentication();
+    // app.UseAuthentication();
     app.UseAuthorization();
     
     app.MapControllers();
