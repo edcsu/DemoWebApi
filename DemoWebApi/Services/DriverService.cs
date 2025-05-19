@@ -20,7 +20,7 @@ public class DriverService : IDriverService
     public async Task<List<DriverInfo>> GetAvailableDrivers()
     {
         return await _context.Users
-            .Where(d => (d.Role == AppRole.Driver))
+            .Where(d => d.Role == AppRole.Rider)
             .Select(d => d.MapToDriverInfo())
             .ToListAsync();
     }
