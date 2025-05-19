@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using DemoWebApi.Data;
+using DemoWebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -63,6 +64,7 @@ try
     builder.Services.AddOpenApi(options =>
     {
     });
+    builder.Services.AddScoped<ITripsService, TripsService>();
 
     var app = builder.Build();
     
